@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 class AppConstants {
   // Environment URLs
   static const String chantsDevUrl =
-      'https://raw.githubusercontent.com/yourusername/spiritual-chanting-data/main/chants.dev.json';
+      'https://raw.githubusercontent.com/lavanyadeepak/lavanyadeepak.github.io/refs/heads/master/chants.dev.json';
   
   static const String chantsProdUrl =
-      'https://raw.githubusercontent.com/yourusername/spiritual-chanting-data/main/chants.prod.json';
+      'https://raw.githubusercontent.com/lavanyadeepak/lavanyadeepak.github.io/refs/heads/master/chants.prod.json';
 
   // Cache settings
   static const String chantsCacheFileName = 'chants_cache.json';
