@@ -27,6 +27,7 @@ class _ChantingHomePageState extends State<ChantingHomePage> {
   Future<void> _loadChants() async {
     try {
       chants = await ChantService().loadChants();
+      chants.sort((a, b) => a.name.compareTo(b.name));
       setState(() => isLoading = false);
     } catch (e) {
       print('Error loading chants: $e');
@@ -53,27 +54,70 @@ class _ChantingHomePageState extends State<ChantingHomePage> {
             if (isLoading)
               const Center(child: CircularProgressIndicator())
             else
-              DropdownButtonFormField<Chant>(
-                value: selectedChant,
-                hint: const Text('--Select a Chant--'),
-                decoration: InputDecoration(
-                  filled: true,
-                  fillColor: const Color(0xFF5E42A6).withOpacity(0.3),
-                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+              LayoutBuilder(
+                builder: (context, constraints) => Autocomplete<Chant>(
+                  optionsBuilder: (TextEditingValue textEditingValue) {
+                    if (textEditingValue.text.isEmpty) {
+                      return chants;
+                    }
+                    return chants.where((Chant option) {
+                      return option.name
+                          .toLowerCase()
+                          .contains(textEditingValue.text.toLowerCase());
+                    });
+                  },
+                  displayStringForOption: (Chant option) => option.name,
+                  onSelected: (Chant selection) {
+                    setState(() => selectedChant = selection);
+                  },
+                  fieldViewBuilder: (context, textEditingController, focusNode,
+                      onFieldSubmitted) {
+                    return TextField(
+                      controller: textEditingController,
+                      focusNode: focusNode,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        hintText: 'Search for a Chant...',
+                        hintStyle: const TextStyle(color: Colors.white54),
+                        filled: true,
+                        fillColor: const Color(0xFF5E42A6).withOpacity(0.3),
+                        border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        suffixIcon:
+                            const Icon(Icons.search, color: Colors.white54),
+                      ),
+                    );
+                  },
+                  optionsViewBuilder: (context, onSelected, options) {
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: Material(
+                        elevation: 4.0,
+                        color: const Color(0xFF5E42A6),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 300),
+                          child: SizedBox(
+                            width: constraints.maxWidth,
+                            child: ListView.builder(
+                              shrinkWrap: true,
+                              padding: EdgeInsets.zero,
+                              itemCount: options.length,
+                              itemBuilder: (BuildContext context, int index) {
+                                final Chant option = options.elementAt(index);
+                                return ListTile(
+                                  title: Text(option.name,
+                                      style:
+                                          const TextStyle(color: Colors.white)),
+                                  onTap: () => onSelected(option),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
-                dropdownColor: const Color(0xFF5E42A6),
-                style: const TextStyle(color: Colors.white),
-                items: chants.map((chant) {
-                  return DropdownMenuItem<Chant>(
-                    value: chant,
-                    child: Text(chant.name, overflow: TextOverflow.ellipsis),
-                  );
-                }).toList(),
-                onChanged: (value) {
-                  if (value != null) {
-                    setState(() => selectedChant = value);
-                  }
-                },
               ),
 
             const SizedBox(height: 20),
